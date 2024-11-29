@@ -17,10 +17,12 @@ Node* lista_areas_livres = NULL;
 Node* lista_alocacoes = NULL;
 int contador_id = 1;
 
+
+
 void ImprimeHeap() {
     for (int i = 0; i < tam_heap; i++)
         printf("%d ", heap[i]);
-    puts(""); // estética
+    puts(""); // estÃ©tica
 }
 
 void Inicializa_Lista() {
@@ -67,110 +69,111 @@ void first(int valor, int* id_alocacao) {
     }
 }
 
-void next(int valor, int* id_alocacao) {
-    static Node* ultima_alocacao = NULL;  // Mantém a referência da última alocação
-    Node* No_atual = ultima_alocacao ? ultima_alocacao : lista_areas_livres;  // Começa da última alocação, ou do início se for a primeira alocação
-    bool encontrou = false;
+void best(int valor, int* id_alocacao){
+    Node* No_atual = lista_areas_livres;
+    Node* No_anterior = NULL;
+    Node* No_melhor = NULL;
+    Node* No_melhor_anterior = NULL;
 
-    while (No_atual != NULL) {
-        if (No_atual->blocos_livres >= valor) {  // Verifica se o bloco tem espaço suficiente
-            *id_alocacao = contador_id++;
-            for (int i = 0; i < valor; i++)
-                heap[No_atual->end_inicial + i] = true;  // Aloca os blocos
-
-            int inicio_alocacao = No_atual->end_inicial;
-
-            // Atualiza o estado após a alocação
-            if (No_atual->blocos_livres == valor) {
-                // Remove o nó atual da lista de áreas livres
-                if (lista_areas_livres == No_atual) {
-                    lista_areas_livres = No_atual->prox;
-                } else {
-                    Node* anterior = lista_areas_livres;
-                    while (anterior->prox != No_atual)
-                        anterior = anterior->prox;
-                    anterior->prox = No_atual->prox;
-                }
-                free(No_atual);
-
-                // Após remover o nó, `ultima_alocacao` deve ser atualizado para o nó seguinte
-                ultima_alocacao = lista_areas_livres;  // Recomeça da lista principal
-            } else {
-                No_atual->end_inicial += valor;
-                No_atual->blocos_livres -= valor;
-                ultima_alocacao = No_atual;  // Atualiza a última alocação corretamente
+    // Encontra o menor bloco que seja suficiente
+    while(No_atual != NULL){
+        if(No_atual->blocos_livres >= valor){
+            if(No_melhor == NULL || No_atual->blocos_livres < No_melhor->blocos_livres){
+                No_melhor = No_atual;
+                No_melhor_anterior = No_anterior;
             }
-
-            // Adiciona a alocação à lista de alocações
-            Node* nova_alocacao = (Node*)malloc(sizeof(Node));
-            nova_alocacao->id = *id_alocacao;
-            nova_alocacao->end_inicial = inicio_alocacao;
-            nova_alocacao->blocos_livres = valor;
-            nova_alocacao->prox = lista_alocacoes;
-            lista_alocacoes = nova_alocacao;
-
-            encontrou = true;
-            break;
         }
-        No_atual = No_atual->prox;  // Move para o próximo nó
+        No_anterior = No_atual;
+        No_atual = No_atual->prox;
     }
 
-    // Caso não tenha encontrado espaço suficiente, começa a busca novamente do início
-    if (!encontrou) {
-        ultima_alocacao = NULL;  // Reinicia a busca a partir do início
-        next(valor, id_alocacao);  // Tenta alocar novamente, começando do início
+    // Se nÃ£o encontrou nenhum bloco adequado
+    if(No_melhor == NULL){
+        printf("Erro: Nao ha bloco livre suficientemente grande.\n");
+        return;
     }
+
+    // Realiza a alocaÃ§Ã£o no melhor bloco encontrado
+    *id_alocacao = contador_id++;
+    for (int i = 0; i < valor; i++)
+        heap[No_melhor->end_inicial + i] = true;
+
+    int inicio_alocacao = No_melhor->end_inicial;
+
+    if (No_melhor->blocos_livres == valor) {
+        // Remove o bloco da lista de Ã¡reas livres
+        if (No_melhor_anterior == NULL)
+            lista_areas_livres = No_melhor->prox;
+        else
+            No_melhor_anterior->prox = No_melhor->prox;
+        free(No_melhor);
+    } else {
+        // Ajusta o bloco restante
+        No_melhor->end_inicial += valor;
+        No_melhor->blocos_livres -= valor;
+    }
+
+    // Adiciona a alocaÃ§Ã£o Ã  lista de alocaÃ§Ãµes
+    Node* nova_alocacao = (Node*)malloc(sizeof(Node));
+    nova_alocacao->id = *id_alocacao;
+    nova_alocacao->end_inicial = inicio_alocacao;
+    nova_alocacao->blocos_livres = valor;
+    nova_alocacao->prox = lista_alocacoes;
+    lista_alocacoes = nova_alocacao;
 }
 
-void liberar(int id_alocacao) {
+void liberar(int id_alocacao){
     Node* atual = lista_alocacoes;
     Node* anterior = NULL;
     bool encontrou = false;
 
-    while (atual != NULL) {
-        if (atual->id == id_alocacao) {
+    while(atual != NULL){
+        if(atual->id == id_alocacao){
             encontrou = true;
-            for (int i = 0; i < atual->blocos_livres; i++)
-                heap[atual->end_inicial + i] = false;
+            for(int i = 0; i < atual->blocos_livres; i++)
+                heap[atual->end_inicial + i] = false;  // Libera os blocos alocados
 
-            if (anterior == NULL)
+            if(anterior == NULL)
                 lista_alocacoes = atual->prox;
             else
                 anterior->prox = atual->prox;
 
+            // Cria um novo nÃ³ para a lista de Ã¡reas livres
             Node* novo_no = (Node*)malloc(sizeof(Node));
             novo_no->end_inicial = atual->end_inicial;
             novo_no->blocos_livres = atual->blocos_livres;
             novo_no->prox = NULL;
 
-            // Inserindo na lista de áreas livres, mantendo a lista ordenada por end_inicial
-            if (lista_areas_livres == NULL || lista_areas_livres->end_inicial > novo_no->end_inicial) {
+            // Inserindo na lista de Ã¡reas livres, mantendo a lista ordenada por end_inicial
+            if(lista_areas_livres == NULL || lista_areas_livres->end_inicial > novo_no->end_inicial){
                 novo_no->prox = lista_areas_livres;
                 lista_areas_livres = novo_no;
-            } else {
-                Node* current = lista_areas_livres;
-                while (current->prox != NULL && current->prox->end_inicial < novo_no->end_inicial)
-                    current = current->prox;
-                novo_no->prox = current->prox;
-                current->prox = novo_no;
+            }
+            else{
+                Node* da_frente = lista_areas_livres;
+                while(da_frente->prox != NULL && da_frente->prox->end_inicial < novo_no->end_inicial)
+                    da_frente = da_frente->prox;
+                novo_no->prox = da_frente->prox;
+                da_frente->prox = novo_no;
             }
 
             // Unindo blocos livres adjacentes, se houver
-            Node* current = lista_areas_livres;
-            Node* prev = NULL;
-            while (current != NULL) {
-                if (prev != NULL && prev->end_inicial + prev->blocos_livres == current->end_inicial) {
-                    prev->blocos_livres += current->blocos_livres;
-                    prev->prox = current->prox;
-                    free(current);
-                    current = prev->prox;
-                } else {
-                    prev = current;
-                    current = current->prox;
+            Node* da_frente = lista_areas_livres;
+            Node* de_tras = NULL;
+            while(da_frente != NULL){
+                if(de_tras != NULL && de_tras->end_inicial + de_tras->blocos_livres == da_frente->end_inicial){
+                    de_tras->blocos_livres += da_frente->blocos_livres;
+                    de_tras->prox = da_frente->prox;
+                    free(da_frente);
+                    da_frente = de_tras->prox;
+                }
+                else{
+                    de_tras = da_frente;
+                    da_frente = da_frente->prox;
                 }
             }
 
-            free(atual);
+            free(atual);  // Libera a alocacao
             ImprimeHeap();
             return;
         }
@@ -178,13 +181,13 @@ void liberar(int id_alocacao) {
         atual = atual->prox;
     }
 
-    if (!encontrou)
-        printf("Erro: Não foi possível liberar o bloco com ID %d.\n", id_alocacao);
+    if(!encontrou)
+        printf("Erro: Nao foi possivel liberar o bloco com ID %d.\n", id_alocacao);
 }
 
 void LiberaLista(Node* lista) {
     Node* atual = lista;
-    while (atual != NULL) {
+    while(atual != NULL) {
         Node* temp = atual;
         atual = atual->prox;
         free(temp);
@@ -196,13 +199,13 @@ void LiberaRecursos() {
     LiberaLista(lista_alocacoes);
 }
 
-int main() {
+int main(){
     ImprimeHeap();
     Inicializa_Lista();
 
     while(1){
         char estrategia[5];
-        printf("\nMODO(first, next, liberar): ");
+        printf("\nMODO(first, best, liberar): ");
         scanf("%s", estrategia);
 
         if(strcmp(estrategia, "first") == 0){
@@ -216,17 +219,6 @@ int main() {
             printf("Alocacao ID: %d\n", id_alocacao);
             ImprimeHeap();
         }
-        else if(strcmp(estrategia, "next") == 0){
-            char nome[10];
-            int valor = 0;
-            printf("Nome e valor: ");
-            scanf("%s %d", nome, &valor);
-
-            int id_alocacao = 0;
-            next(valor, &id_alocacao);
-            printf("Alocacao ID: %d\n", id_alocacao);
-            ImprimeHeap();
-        }
         else if (strcmp(estrategia, "liberar") == 0) {
             int id_alocacao = 0;
             printf("ID da alocacao a ser liberada: ");
@@ -235,6 +227,17 @@ int main() {
             liberar(id_alocacao);
             ImprimeHeap();
         }
+        else if(strcmp(estrategia, "best") == 0){
+        char nome[10];
+        int valor = 0;
+        printf("Nome e valor: ");
+        scanf("%s %d", nome, &valor);
+
+        int id_alocacao = 0;
+        best(valor, &id_alocacao);
+        printf("Alocacao ID: %d\n", id_alocacao);
+        ImprimeHeap();
+}
         else
             printf("Opcao invalida\n");
     }
