@@ -78,7 +78,7 @@ void best(int valor, int* id_alocacao){
     // Encontra o menor bloco que seja suficiente
     while(No_atual != NULL){
         if(No_atual->blocos_livres >= valor){
-            if(No_melhor == NULL || No_atual->blocos_livres < No_melhor->blocos_livres){
+            if(No_melhor == NULL || No_atual->blocos_livres < No_melhor->blocos_livres){ //im = j... (mesma ideia do selection sort, por exemplo).
                 No_melhor = No_atual;
                 No_melhor_anterior = No_anterior;
             }
@@ -87,7 +87,7 @@ void best(int valor, int* id_alocacao){
         No_atual = No_atual->prox;
     }
 
-    // Se não encontrou nenhum bloco adequado
+    // Se não encontrou nenhum bloco com espaco suficiente
     if(No_melhor == NULL){
         printf("Erro: Nao ha bloco livre suficientemente grande.\n");
         return;
@@ -95,25 +95,80 @@ void best(int valor, int* id_alocacao){
 
     // Realiza a alocação no melhor bloco encontrado
     *id_alocacao = contador_id++;
-    for (int i = 0; i < valor; i++)
+    for(int i = 0; i < valor; i++)
         heap[No_melhor->end_inicial + i] = true;
 
     int inicio_alocacao = No_melhor->end_inicial;
 
-    if (No_melhor->blocos_livres == valor) {
+    if(No_melhor->blocos_livres == valor){
         // Remove o bloco da lista de áreas livres
-        if (No_melhor_anterior == NULL)
+        if(No_melhor_anterior == NULL)
             lista_areas_livres = No_melhor->prox;
         else
             No_melhor_anterior->prox = No_melhor->prox;
         free(No_melhor);
-    } else {
+    }
+    else{
         // Ajusta o bloco restante
         No_melhor->end_inicial += valor;
         No_melhor->blocos_livres -= valor;
     }
 
-    // Adiciona a alocação à lista de alocações
+    // Adiciona a alocacão à lista de alocacões
+    Node* nova_alocacao = (Node*)malloc(sizeof(Node));
+    nova_alocacao->id = *id_alocacao;
+    nova_alocacao->end_inicial = inicio_alocacao;
+    nova_alocacao->blocos_livres = valor;
+    nova_alocacao->prox = lista_alocacoes;
+    lista_alocacoes = nova_alocacao;
+}
+
+void worst(int valor, int* id_alocacao){
+    Node* No_atual = lista_areas_livres;
+    Node* No_anterior = NULL;
+    Node* No_pior = NULL;
+    Node* No_pior_anterior = NULL;
+
+    // Encontra o maior bloco que seja suficiente
+    while(No_atual != NULL){
+        if(No_atual->blocos_livres >= valor){
+            if(No_pior == NULL || No_atual->blocos_livres > No_pior->blocos_livres){ // troca o sinal
+                No_pior = No_atual;
+                No_pior_anterior = No_anterior;
+            }
+        }
+        No_anterior = No_atual;
+        No_atual = No_atual->prox;
+    }
+
+    // Se não encontrou nenhum bloco com espaco suficiente
+    if(No_pior == NULL){
+        printf("Erro: Nao ha bloco livre suficientemente grande.\n");
+        return;
+    }
+
+    // Realiza a alocação no pior bloco encontrado
+    *id_alocacao = contador_id++;
+    for(int i = 0; i < valor; i++)
+        heap[No_pior->end_inicial + i] = true;
+
+    int inicio_alocacao = No_pior->end_inicial;
+
+    if(No_pior->blocos_livres == valor){
+        // Remove o bloco da lista de áreas livres
+        if(No_pior_anterior == NULL)
+            lista_areas_livres = No_pior->prox;
+        else
+            No_pior_anterior->prox = No_pior->prox;
+        free(No_pior);
+    }
+    else{
+        // Ajusta o bloco restante
+        No_pior->end_inicial += valor;
+        No_pior->blocos_livres -= valor;
+    }
+
+    // Adiciona a alocacão à lista de alocacões
     Node* nova_alocacao = (Node*)malloc(sizeof(Node));
     nova_alocacao->id = *id_alocacao;
     nova_alocacao->end_inicial = inicio_alocacao;
@@ -205,7 +260,7 @@ int main(){
 
     while(1){
         char estrategia[5];
-        printf("\nMODO(first, best, liberar): ");
+        printf("\nMODO(first, best, worst ,liberar): ");
         scanf("%s", estrategia);
 
         if(strcmp(estrategia, "first") == 0){
@@ -219,6 +274,31 @@ int main(){
             printf("Alocacao ID: %d\n", id_alocacao);
             ImprimeHeap();
         }
+
+        else if(strcmp(estrategia, "best") == 0){
+            char nome[10];
+            int valor = 0;
+            printf("Nome e valor: ");
+            scanf("%s %d", nome, &valor);
+
+            int id_alocacao = 0;
+            best(valor, &id_alocacao);
+            printf("Alocacao ID: %d\n", id_alocacao);
+            ImprimeHeap();
+        }
+
+        else if(strcmp(estrategia, "worst") == 0){
+            char nome[10];
+            int valor = 0;
+            printf("Nome e valor: ");
+            scanf("%s %d", nome, &valor);
+
+            int id_alocacao = 0;
+            worst(valor, &id_alocacao);
+            printf("Alocacao ID: %d\n", id_alocacao);
+            ImprimeHeap();
+        }
+
         else if (strcmp(estrategia, "liberar") == 0) {
             int id_alocacao = 0;
             printf("ID da alocacao a ser liberada: ");
@@ -227,17 +307,7 @@ int main(){
             liberar(id_alocacao);
             ImprimeHeap();
         }
-        else if(strcmp(estrategia, "best") == 0){
-        char nome[10];
-        int valor = 0;
-        printf("Nome e valor: ");
-        scanf("%s %d", nome, &valor);
 
-        int id_alocacao = 0;
-        best(valor, &id_alocacao);
-        printf("Alocacao ID: %d\n", id_alocacao);
-        ImprimeHeap();
-}
         else
             printf("Opcao invalida\n");
     }
