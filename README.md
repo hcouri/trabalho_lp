@@ -16,7 +16,7 @@ No primeiro trabalho, vocês devem implementar algum dos trabalhos listados [nes
 
 ## Segundo Trabalho de Implementacao
 
-Neste trabalho vocês devem implementar e incrementar algum dos trabalhos disponíveis neste arquivo, ou algum outro que apresente previamente para o professor e seja aceito como opção, usando o paradigma OO. O uso da linguagem Java não é obrigatório. Estes trabalhos podem ser feitos de forma individual ou em dupla. Cada trabalho só poderá ser escolhido por, no máximo, 2 grupos e será respeitada a ordem dos pull requests.)
+Neste trabalho vocês devem implementar e incrementar algum dos trabalhos disponíveis [neste arquivo](http://www2.ic.uff.br/~bazilio/cursos/pp/material/ListaExerciciosProgOO.pdf), ou algum outro que apresente previamente para o professor e seja aceito como opção, usando o paradigma OO. O uso da linguagem Java não é obrigatório. Estes trabalhos podem ser feitos de forma individual ou em dupla. Cada trabalho só poderá ser escolhido por, no máximo, 2 grupos e será respeitada a ordem dos pull requests.)
 
 - Henrique Couri - 7 - https://github.com/hcouri/trabalho_lp.git
 
