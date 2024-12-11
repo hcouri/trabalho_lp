@@ -68,6 +68,12 @@ void first(int valor, int* id_alocacao){
         No_anterior = No_atual;
         No_atual = No_atual->prox;
     }
+    
+    // Se não encontrou nenhum bloco com espaco suficiente
+    if(No_atual == NULL){
+        printf("Erro: Nao ha bloco livre suficientemente grande.\n");
+        return;
+    }
 }
 
 void best(int valor, int* id_alocacao){
