@@ -6,12 +6,12 @@
 #define tam_heap 12
 bool heap[tam_heap] = {false};
 
-typedef struct Node {
+typedef struct Node{
     int id;
     int end_inicial;
     int blocos_livres;
     struct Node* prox;
-} Node;
+}Node;
 
 Node* lista_areas_livres = NULL;
 Node* lista_alocacoes = NULL;
@@ -19,38 +19,39 @@ int contador_id = 1;
 
 
 
-void ImprimeHeap() {
-    for (int i = 0; i < tam_heap; i++)
+void ImprimeHeap(){
+    for(int i = 0; i < tam_heap; i++)
         printf("%d ", heap[i]);
     puts(""); // estética
 }
 
-void Inicializa_Lista() {
+void Inicializa_Lista(){
     lista_areas_livres = (Node*)malloc(sizeof(Node));
     lista_areas_livres->end_inicial = 0;
     lista_areas_livres->blocos_livres = tam_heap; // tam_heap == 12
     lista_areas_livres->prox = NULL;
 }
 
-void first(int valor, int* id_alocacao) {
+void first(int valor, int* id_alocacao){
     Node* No_atual = lista_areas_livres;
     Node* No_anterior = NULL;
 
-    while (No_atual != NULL) {
-        if (No_atual->blocos_livres >= valor) {
+    while(No_atual != NULL){
+        if(No_atual->blocos_livres >= valor){
             *id_alocacao = contador_id++;
-            for (int i = 0; i < valor; i++)
+            for(int i = 0; i < valor; i++)
                 heap[No_atual->end_inicial + i] = true;
 
             int inicio_alocacao = No_atual->end_inicial;
 
-            if (No_atual->blocos_livres == valor) {
-                if (No_anterior == NULL)
+            if(No_atual->blocos_livres == valor){
+                if(No_anterior == NULL)
                     lista_areas_livres = No_atual->prox;
                 else
                     No_anterior->prox = No_atual->prox;
                 free(No_atual);
-            } else {
+            }
+            else{
                 No_atual->blocos_livres -= valor;
                 No_atual->end_inicial += valor;
             }
@@ -240,16 +241,16 @@ void liberar(int id_alocacao){
         printf("Erro: Nao foi possivel liberar o bloco com ID %d.\n", id_alocacao);
 }
 
-void LiberaLista(Node* lista) {
+void LiberaLista(Node* lista){
     Node* atual = lista;
-    while(atual != NULL) {
+    while(atual != NULL){
         Node* temp = atual;
         atual = atual->prox;
         free(temp);
     }
 }
 
-void LiberaRecursos() {
+void LiberaRecursos(){
     LiberaLista(lista_areas_livres);
     LiberaLista(lista_alocacoes);
 }
@@ -260,7 +261,7 @@ int main(){
 
     while(1){
         char estrategia[5];
-        printf("\nMODO(first, best, worst ,liberar): ");
+        printf("\nMODO(first, best, worst , liberar): ");
         scanf("%s", estrategia);
 
         if(strcmp(estrategia, "first") == 0){
