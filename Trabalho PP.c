@@ -267,7 +267,7 @@ int main(){
 
     while(1){
         char estrategia[5];
-        printf("\nMODO(first, best, worst , liberar): ");
+        printf("\nMODO(first, best, worst , liberar, sair): ");
         scanf("%s", estrategia);
 
         if(strcmp(estrategia, "first") == 0){
@@ -306,7 +306,7 @@ int main(){
             ImprimeHeap();
         }
 
-        else if (strcmp(estrategia, "liberar") == 0) {
+        else if(strcmp(estrategia, "liberar") == 0){
             int id_alocacao = 0;
             printf("ID da alocacao a ser liberada: ");
             scanf("%d", &id_alocacao);
@@ -315,9 +315,14 @@ int main(){
             ImprimeHeap();
         }
 
+        else if(strcmp(estrategia, "sair") == 0){
+            printf("Encerrando\n");
+            break; //sai do while
+        }
+        
         else
             printf("Opcao invalida\n");
     }
 
-    LiberaRecursos();
+    LiberaRecursos(); //consegue liberar as duas listas pois sao globais, modificacoes em qualquer lugar terao impacto global e imediato
 }
