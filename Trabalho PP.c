@@ -317,7 +317,7 @@ int main(){
 
         else if(strcmp(estrategia, "sair") == 0){
             printf("Encerrando\n");
-            break; //sai do while
+            break; //sai do while para liberar recursos
         }
         
         else
