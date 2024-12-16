@@ -26,10 +26,12 @@ void ImprimeHeap(){
 }
 
 void Inicializa_Lista(){
+    //preciso inicialisar a lista de areas livres porque, inicialmente, a lista de areas livres é um grande no de tamanho igual a tam_heap
     lista_areas_livres = (Node*)malloc(sizeof(Node));
     lista_areas_livres->end_inicial = 0;
     lista_areas_livres->blocos_livres = tam_heap; // tam_heap == 12
     lista_areas_livres->prox = NULL;
+    //nao preciso inicialisar a lista de areas alocadas porque eu ja fiz antes ela = NULL e vou atualizando ela aos poucos ao longo do programa
 }
 
 void first(int valor, int* id_alocacao){
